@@ -38,16 +38,13 @@ class IntegralMC:
         num_chunks = (n + chunk_size - 1) // chunk_size  # defines how many chunks are left based on n
         with tqdm(total=num_chunks) as pbar:  # defines progress bar
             while n > 0:  # continues monte carlo until permutations are finished
-                current_chunk = min(n,
-                                    chunk_size)  # determines to use chunk size (if n > chunk_size) or n (if total remaining times to perform loop is less than chunk_size)
+                current_chunk = min(n, chunk_size)  # determines to use chunk size (if n > chunk_size) or n (if total remaining times to perform loop is less than chunk_size)
                 x = cp.random.uniform(a, b, current_chunk)  # takes a random number x within the bounds of the integral
-                sum_function_output += cp.sum(
-                    f(x))  # substitutes each x value into the function to get their y value, or vertical distance from y=0
+                sum_function_output += cp.sum(f(x))  # substitutes each x value into the function to get their y value, or vertical distance from y=0
                 total_points += current_chunk  # adds total amount of points to the 1/N term
                 n -= current_chunk  # lets n approach 0 (calculation progress)
                 pbar.update(1)
-            estimate_output = (b - a) * (
-                        sum_function_output / total_points)  # I ≈ (b - a) * (1/N) * Σ f(xi) --- (the actual monte carlo equation)
+            estimate_output = (b - a) * (sum_function_output / total_points)  # I ≈ (b - a) * (1/N) * Σ f(xi) --- (the actual monte carlo equation)
             return estimate_output  # returns calculated integral value
 
     def int_loop(self, batches, histories, int_per_batch, a, b, chunk_size, f, hist_factor):
@@ -61,7 +58,7 @@ class IntegralMC:
                 num.append(self.int_estimate(histories, a, b, chunk_size, f))
             history_count_list.append(histories)
             calc_int.append(num)
-            histories *= hist_factor  # increase the number of histories for the next batch (for data analysis)
+            histories += hist_factor  # increase the number of histories for the next batch (for data analysis)
             batch_time = time.time() - batch_start_time  # Calculate the time taken for this batch
             batch_times_y = [batch_time]  # appends batch_time into batch_times_y
             batch_times.append(batch_times_y)
