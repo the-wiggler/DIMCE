@@ -8,7 +8,7 @@ import os
 
 
 class IntegralMC:
-    def __init__(self, batches, int_per_batch, chunk_size, a, b, histories, f, hist_factor):
+    def __init__(self, batches, int_per_batch, chunk_size, a, b, histories, f, hist_factor, repetition_factor):
         self.batches = batches
         self.int_per_batch = int_per_batch
         self.chunk_size = chunk_size
@@ -17,19 +17,19 @@ class IntegralMC:
         self.histories = histories
         self.f = f
         self.hist_factor = hist_factor
+        self.repetition_factor = repetition_factor
 
     # Monte Carlo method to calculate the integral over (a, b)
     def calc(self):  # calc is short for calculator for those who are just now viewing the program
         start = time.time()  # Start timing the process
         calc_int, history_count_list, batch_times = self.int_loop(self.batches, self.histories, self.int_per_batch,
                                                                   self.a, self.b, self.chunk_size, self.f,
-                                                                  self.hist_factor)  # int_loop performs a loop of MC calculation as defined by int_estimate
+                                                                  self.hist_factor, self.repetition_factor)  # int_loop performs a loop of MC calculation as defined by int_estimate
         self.int_print(self.batches, history_count_list, calc_int)  # takes calc_int array from int_loop and prints it
         avg_calc_int = self.avg_matrix(calc_int)  # averages each row of multiple columns in calc_int into one column
-        std_list = self.std_calc_int(self.batches,
-                                     calc_int)  # calculates standard deviation of each row in calc_int and formats it similarly to avg_calc_int
-        self.sv_matrix(calc_int, avg_calc_int, std_list, history_count_list,
-                       batch_times)  # exports arrays to np_store folder
+        std_list = self.std_calc_int(self.batches, calc_int, self.repetition_factor)  # calculates standard deviation of each row in calc_int and formats it similarly to avg_calc_int
+        self.sv_matrix(calc_int, avg_calc_int, std_list, history_count_list, batch_times)  # exports arrays to np_store folder
+        # self.history_collect(history_count_list, self.batches)
         print(f'EXECUTION TIME: {time.time() - start} SECONDS')  # print the execution time
 
     def int_estimate(self, n, a, b, chunk_size, f):  # function that performs an individual MC calculation on the defined integral function. "n" refers to the number of MC sample points left to take: total_points approaches n's original value as n decreases: n = histories
@@ -47,23 +47,27 @@ class IntegralMC:
             estimate_output = (b - a) * (sum_function_output / total_points)  # I ≈ (b - a) * (1/N) * Σ f(xi) --- (the actual monte carlo equation)
             return estimate_output  # returns calculated integral value
 
-    def int_loop(self, batches, histories, int_per_batch, a, b, chunk_size, f, hist_factor):
+    def int_loop(self, batches, histories, int_per_batch, a, b, chunk_size, f, hist_factor, repetition_factor):
         calc_int = []  # list that the calculated integral estimations are put into
         history_count_list = []  # records number of histories performed per batch
         batch_times = []  # records the time taken per batch
-        for i in range(batches):
-            batch_start_time = time.time()
-            num = []
-            for i in range(int_per_batch):
-                num.append(self.int_estimate(histories, a, b, chunk_size, f))
-            history_count_list.append(histories)
-            calc_int.append(num)
-            histories += hist_factor  # increase the number of histories for the next batch (for data analysis)
-            batch_time = time.time() - batch_start_time  # Calculate the time taken for this batch
-            batch_times_y = [batch_time]  # appends batch_time into batch_times_y
-            batch_times.append(batch_times_y)
+        for _ in range(repetition_factor):
+            delta_histories = histories
+            for i in range(batches):
+                batch_start_time = time.time()
+                num = []
+                for i in range(int_per_batch):
+                    num.append(self.int_estimate(delta_histories, a, b, chunk_size, f))
+                history_count_list.append([delta_histories])
+                calc_int.append(num)
+                delta_histories += hist_factor  # increase the number of histories for the next batch (for data analysis)
+                batch_time = time.time() - batch_start_time  # Calculate the time taken for this batch
+                batch_times_y = [batch_time]  # appends batch_time into batch_times_y
+                batch_times.append(batch_times_y)
         batch_times = cp.array(batch_times)
         calc_int = cp.array(calc_int)
+        history_count_list = cp.array(history_count_list)
+        print(history_count_list)
         return calc_int, history_count_list, batch_times
 
     def int_print(self, batches, int_per_batch, calc_int):
@@ -83,12 +87,13 @@ class IntegralMC:
         print(avg_calc_int)
         return avg_calc_int
 
-    def std_calc_int(self, batches, calc_int):
+    def std_calc_int(self, batches, calc_int, repetition_factor):
         # Take standard deviations of calc_int array
         std_list = []
-        for i in range(batches):
-            std_y = [cp.std(calc_int[i])]  # calculate standard deviation for each batch
-            std_list.append(std_y)
+        for l in range(repetition_factor):
+            for i in range(batches):
+                std_y = [cp.std(calc_int[i])]  # calculate standard deviation for each batch
+                std_list.append(std_y)
         std_list = cp.array(std_list)
         print("STANDARD DEVIATION FOR INTEGRAL OUTPUT ARRAY")
         print(std_list)
@@ -99,6 +104,6 @@ class IntegralMC:
         np.save(os.path.join('np_store', 'calc_int.npy'), calc_int.get())
         np.save(os.path.join('np_store', 'avg_calc_int.npy'), avg_calc_int.get())
         np.save(os.path.join('np_store', 'std_list.npy'), std_list.get())
-        np.save(os.path.join('np_store', 'history_count_list.npy'), history_count_list)
+        np.save(os.path.join('np_store', 'history_count_list.npy'), history_count_list.get())
         np.save(os.path.join('np_store', 'batch_times.npy'), batch_times.get())
         # .get() is used to convert cupy arrays to numpy arrays before saving
