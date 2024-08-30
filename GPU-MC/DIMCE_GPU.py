@@ -101,9 +101,9 @@ class IntegralMC:
 
     def sv_matrix(self, calc_int, avg_calc_int, std_list, history_count_list, batch_times):
         # Save results as numpy arrays in the 'np_store' directory
-        np.save(os.path.join('np_store', 'calc_int.npy'), calc_int.get())
-        np.save(os.path.join('np_store', 'avg_calc_int.npy'), avg_calc_int.get())
-        np.save(os.path.join('np_store', 'std_list.npy'), std_list.get())
-        np.save(os.path.join('np_store', 'history_count_list.npy'), history_count_list.get())
-        np.save(os.path.join('np_store', 'batch_times.npy'), batch_times.get())
+        np.save(os.path.join('np_store_GPU', 'calc_int.npy'), calc_int.get())
+        np.save(os.path.join('np_store_GPU', 'avg_calc_int.npy'), avg_calc_int.get())
+        np.save(os.path.join('np_store_GPU', 'std_list.npy'), std_list.get())
+        np.save(os.path.join('np_store_GPU', 'history_count_list.npy'), history_count_list.get())
+        np.save(os.path.join('np_store_GPU', 'batch_times.npy'), batch_times.get())
         # .get() is used to convert cupy arrays to numpy arrays before saving

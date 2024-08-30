@@ -8,7 +8,7 @@ class PlotArrays:
     def __init__(self, calc_int, avg_calc_int, std_list, history_count_list, batch_times):
         self.calc_int = calc_int
         self.avg_calc_int = avg_calc_int
-        self.std_list = std_list
+        self.std_list_CPU = std_list
         self.history_count_list = history_count_list
         self.batch_times = batch_times
 
@@ -82,27 +82,14 @@ class PlotArrays:
         plt.plot(x_fit, y_fit, 'r-', label=f"Fit: {a:.3e}*x + {b:.3e}")
         plt.legend()
 
-    # def inprogress(self):
-        # batch size (int_per_batch) v. accuracy (# of batches constant)
-        # x = int_per_batch
-        # y = avg_calc_int
-        # plt.figure(1)
-        # plt.suptitle("Integral Calculation Value v. History Count")
-        # plt.title(r'$\int_{0}^{5} f(x) = \sin{(x)}\, dx$', fontsize=10)
-        # plt.xlabel("History Count")
-        # plt.ylabel("Integral Calculation Value")
-        # plt.xscale('linear')
-        # plt.scatter(x , y, s=0.05, alpha=1, color='r')
 
-        # chunk_size v. execution time (all else constant)
-        # different functions v. execution time
 
 
 plot_arrays = PlotArrays(
-    calc_int=np.load(os.path.join('np_store', 'calc_int.npy')),
-    avg_calc_int=np.load(os.path.join('np_store', 'avg_calc_int.npy')),
-    std_list=np.load(os.path.join('np_store', 'std_list.npy')),
-    history_count_list=np.load(os.path.join('np_store', 'history_count_list.npy')),
-    batch_times=np.load(os.path.join('np_store', 'batch_times.npy')),
+    calc_int=np.load(os.path.join('np_store_CPU', 'calc_int.npy')),
+    avg_calc_int=np.load(os.path.join('np_store_CPU', 'avg_calc_int.npy')),
+    std_list=np.load(os.path.join('np_store_CPU', 'std_list.npy')),
+    history_count_list=np.load(os.path.join('np_store_CPU', 'history_count_list.npy')),
+    batch_times=np.load(os.path.join('np_store_CPU', 'batch_times.npy')),
 )
 

@@ -91,8 +91,8 @@ class IntegralMC:
         return std_list
 
     def sv_matrix(self, calc_int, avg_calc_int, std_list, history_count_list, batch_times):
-        np.save(os.path.join('np_store', 'calc_int.npy'), calc_int)
-        np.save(os.path.join('np_store', 'avg_calc_int.npy'), avg_calc_int)
-        np.save(os.path.join('np_store', 'std_list.npy'), std_list)
-        np.save(os.path.join('np_store', 'history_count_list.npy'), history_count_list)
-        np.save(os.path.join('np_store', 'batch_times.npy'), batch_times)
+        np.save(os.path.join('np_store_CPU', 'calc_int.npy'), calc_int)
+        np.save(os.path.join('np_store_CPU', 'avg_calc_int.npy'), avg_calc_int)
+        np.save(os.path.join('np_store_CPU', 'std_list.npy'), std_list)
+        np.save(os.path.join('np_store_CPU', 'history_count_list.npy'), history_count_list)
+        np.save(os.path.join('np_store_CPU', 'batch_times.npy'), batch_times)
