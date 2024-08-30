@@ -75,10 +75,10 @@ class PlotArrays:
 
 
 plot_arrays = PlotArrays(
-    calc_int=np.load(os.path.join('np_store', 'calc_int.npy')),
-    avg_calc_int=np.load(os.path.join('np_store', 'avg_calc_int.npy')),
-    std_list=np.load(os.path.join('np_store', 'std_list.npy')),
-    history_count_list=np.load(os.path.join('np_store', 'history_count_list.npy')),
-    batch_times=np.load(os.path.join('np_store', 'batch_times.npy')),
+    calc_int=np.load(os.path.join('np_store_GPU', 'calc_int.npy')),
+    avg_calc_int=np.load(os.path.join('np_store_GPU', 'avg_calc_int.npy')),
+    std_list=np.load(os.path.join('np_store_GPU', 'std_list.npy')),
+    history_count_list=np.load(os.path.join('np_store_GPU', 'history_count_list.npy')),
+    batch_times=np.load(os.path.join('np_store_GPU', 'batch_times.npy')),
 )
 
