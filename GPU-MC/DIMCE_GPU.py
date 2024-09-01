@@ -4,6 +4,7 @@ from tqdm import tqdm
 import time
 import os
 
+
 class IntegralMC:
     def __init__(self, batches, int_per_batch, chunk_size, a, b, histories, f, hist_factor, repetition_factor):
         self.batches = batches
@@ -53,6 +54,7 @@ class IntegralMC:
                 history_count_list.append(delta_histories)
                 calc_int.extend(num)
                 delta_histories += hist_factor
+                # int_per_batch += 1
                 batch_time = time.time() - batch_start_time
                 batch_times.append(batch_time)
         print(calc_int)
