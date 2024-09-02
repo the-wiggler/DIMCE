@@ -51,7 +51,7 @@ class IntegralMC:
                 num = [self.int_estimate(delta_histories, a, b, chunk_size, f) for _ in range(int_per_batch)]
                 history_count_list.append(delta_histories)
                 calc_int.extend(num)
-                delta_histories += hist_factor
+                delta_histories *= hist_factor
                 batch_time = time.time() - batch_start_time
                 batch_times.append(batch_time)
         print(calc_int)
