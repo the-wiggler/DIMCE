@@ -1,0 +1,22 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build fortran",
+            "type": "shell",
+            "command": "gfortran",
+            "args": [
+                "-o", "main.exe",
+                "main.f90"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/FDIMCE"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        }
+    ]
+}
