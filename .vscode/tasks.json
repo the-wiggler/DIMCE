@@ -6,7 +6,7 @@
             "type": "shell",
             "command": "gfortran",
             "args": [
-                "-o", "main.exe",
+                "-o", "main",
                 "main.f90"
             ],
             "options": {
