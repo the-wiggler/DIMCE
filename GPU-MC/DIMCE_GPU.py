@@ -1,6 +1,5 @@
 import cupy as cp
 import numpy as np
-from tqdm import tqdm
 import time
 import os
 
@@ -31,16 +30,14 @@ class IntegralMC:
         sum_function_output = 0
         total_points = 0
         num_chunks = (n + chunk_size - 1) // chunk_size
-        with tqdm(total=num_chunks) as pbar:
-            while n > 0:
-                current_chunk = min(n, chunk_size)
-                x = cp.random.uniform(a, b, current_chunk)
-                sum_function_output += cp.sum(f(x))
-                total_points += current_chunk
-                n -= current_chunk
-                pbar.update(1)
-            estimate_output = (b - a) * (sum_function_output / total_points)
-            return estimate_output
+        while n > 0:
+            current_chunk = min(n, chunk_size)
+            x = cp.random.uniform(a, b, current_chunk)
+            sum_function_output += cp.sum(f(x))
+            total_points += current_chunk
+            n -= current_chunk
+        estimate_output = (b - a) * (sum_function_output / total_points)
+        return estimate_output
 
     def int_loop(self, batches, histories, int_per_batch, a, b, chunk_size, f, hist_factor, repetition_factor):
         calc_int = []
@@ -48,14 +45,17 @@ class IntegralMC:
         batch_times = []
         for _ in range(repetition_factor):
             delta_histories = histories
+            bat = batches
             for _ in range(batches):
                 batch_start_time = time.time()
                 num = [self.int_estimate(delta_histories, a, b, chunk_size, f) for _ in range(int_per_batch)]
                 history_count_list.append(delta_histories)
                 calc_int.extend(num)
-                delta_histories *= hist_factor
+                delta_histories += hist_factor
                 batch_time = time.time() - batch_start_time
                 batch_times.append(batch_time)
+                print(f'Batches: {bat}')
+                bat -= 1
         print(calc_int)
         return cp.array(calc_int), cp.array(history_count_list), cp.array(batch_times)
 
