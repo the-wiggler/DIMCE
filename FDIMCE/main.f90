@@ -1,50 +1,83 @@
-program monte_carlo_integration
+program integralMCF
     implicit none
     integer, parameter :: dp = selected_real_kind(15, 307)
-    integer :: points_per_batch = 10000
-    real(dp) :: x, sum_curve, final_integral_estimate
-    integer :: i, j, k
+    integer :: histories = 50000
+    real(dp) :: x, sum_curve, final_integral_estimate, mean, variance, stddev
     real(dp) :: a, b
-    integer :: total_checks, batches, bat_countdown, iter_pb
-    real(dp), allocatable :: batch_results(:)
-    real(dp), allocatable :: calc_int(:)
-   
+    integer :: i, j, k, total_checks, batches, bat_countdown, iter_pb
+    integer :: start, finish, rate
+    real(dp), allocatable :: batch_results(:), calc_int(:), calc_stddev(:), batch_times(:)
+    integer, allocatable :: history_count(:)
     call random_seed()
-    a = 0.0_dp
-    b = 6.0_dp
-    batches = 3
-    iter_pb = 5
+    call system_clock(count_rate=rate)
+
+    a = 0.0_dp ! lower range of integration
+    b = 6.0_dp ! upper range of integration
+    batches = 200 ! how many times to perform an integral estimation
+    iter_pb = 5 ! how many iterations should be performed in each batch (to be averaged together)
 
     allocate(calc_int(batches))
-    allocate(batch_results(iter_pb))
+    allocate(calc_stddev(batches))
+    allocate(history_count(batches))
+    allocate(batch_times(batches))
     bat_countdown = batches
-    do j = 1, batches
+    do j = 1, batches ! a loop that recursively creates new estimations with an increasing history rate for data analysis
+        call system_clock(start) ! batch time start
+        allocate(batch_results(iter_pb))
         do k = 1, iter_pb
-        sum_curve = 0.0_dp
-        total_checks = 0
-            do i = 1, points_per_batch
+            sum_curve = 0.0_dp ! the sum of output values
+            total_checks = 0 ! the total points taken in this iteration
+            do i = 1, histories
                 call random_number(x)
-                x = a + x * (b - a)
-                sum_curve = sum_curve + f(x)
+                x = a + x * (b - a) ! scales x to be within a range from b to a
+                sum_curve = sum_curve + f(x) ! calculates an output value based on a random x and adds it to the total
                 total_checks = total_checks + 1
             end do
-        batch_results(k) = (b - a) * (sum_curve / total_checks)
+            batch_results(k) = (b - a) * (sum_curve / total_checks) ! calculates the integral by averaging the range of y values and calculating the area based on width x avg height
         end do
-        ! print *, 'Time remaining:', bat_countdown, '| Estimates:', points_per_batch
-        bat_countdown = bat_countdown - 1
-        points_per_batch = points_per_batch + 100
-        print *, batch_results
-        calc_int = sum(batch_results) / iter_pb
-    end do
-    print *, 'Estimated integral value:', calc_int
-    
 
-    deallocate(batch_results)
+        mean = sum(batch_results) / iter_pb ! Calculate mean of the batch
+
+        calc_int(j) = mean
+        call system_clock(finish) ! batch time end
+        batch_times(j) = real(finish - start) / real(rate)
+
+        variance = sum((batch_results - mean) ** 2) / (iter_pb - 1) ! calculates variance of batch_results set over {iter_pb} trials
+        stddev = sqrt(variance) ! calculates standard deviation 
+        calc_stddev(j) = stddev
+
+        print *, 'Time remaining:', bat_countdown, '| Estimates:', histories
+        bat_countdown = bat_countdown - 1
+        history_count(j) = histories
+        histories = histories + 10000
+        deallocate(batch_results)
+    end do
+
+    print *, 'Estimated integral value:'
+    do j = 1, batches
+        print *, 'Batch ', j, ': ', calc_int(j)
+    end do
+    print *, 'Standard deviation for each batch:'
+    do j = 1, batches
+        print *, 'Batch ', j, ': ', calc_stddev(j)
+    end do
+    print *, 'History Values:'
+    do j = 1, batches
+        print *, 'Batch ', j, ': ', history_count(j)
+    end do
+        print *, 'Batch Times:'
+    do j = 1, batches
+        print *, 'Batch ', j, ': ', batch_times(j)
+    end do
+
+
     deallocate(calc_int)
+    deallocate(calc_stddev)
+    deallocate(history_count)
 
 contains
     function f(x) result(y)
         real(dp) :: x, y
         y = x ** 2
     end function f
-end program monte_carlo_integration
+end program integralMCF
