@@ -1,6 +1,6 @@
 program integralMCF
-    implicit none
     use omp_lib
+    implicit none
     integer, parameter :: dp = selected_real_kind(15, 307)
     integer :: histories = 50000
     real(dp) :: x, sum_curve, final_integral_estimate, mean, variance, stddev
@@ -21,10 +21,14 @@ program integralMCF
     allocate(calc_stddev(batches))
     allocate(history_count(batches))
     allocate(batch_times(batches))
+    allocate(batch_results(iter_pb))
     bat_countdown = batches
+
+    call omp_set_num_threads(16)
+    !$OMP PARALLEL DO PRIVATE(j, k, i, sum_curve, total_checks, x, variance, stddev, mean) SHARED(a, b, histories, calc_int, calc_stddev, history_count, batch_times)
     do j = 1, batches ! a loop that recursively creates new estimations with an increasing history rate for data analysis
         call system_clock(start) ! batch time start
-        allocate(batch_results(iter_pb))
+        ! allocate(batch_results(iter_pb))
         do k = 1, iter_pb
             sum_curve = 0.0_dp ! the sum of output values
             total_checks = 0 ! the total points taken in this iteration
@@ -51,8 +55,10 @@ program integralMCF
         bat_countdown = bat_countdown - 1
         history_count(j) = histories
         histories = histories + 10000
-        deallocate(batch_results)
+        ! deallocate(batch_results)
     end do
+    !$OMP END PARALLEL DO
+    
 
     print *, 'Estimated integral value:'
     do j = 1, batches
@@ -93,6 +99,7 @@ program integralMCF
     deallocate(calc_int)
     deallocate(calc_stddev)
     deallocate(history_count)
+    deallocate(batch_results)
 
 contains
     function f(x) result(y)
