@@ -70,6 +70,24 @@ program integralMCF
         print *, 'Batch ', j, ': ', batch_times(j)
     end do
 
+    ! write arrays
+    open(unit=1, file='IMCF_out/calc_int.bin', form='unformatted', status='replace')
+    write(1) calc_int
+    close(1)
+
+    open(unit=2, file='IMCF_out/calc_stddev.bin', form='unformatted', status='replace')
+    write(2) calc_stddev
+    close(2)
+
+    open(unit=3, file='IMCF_out/history_count.bin', form='unformatted', status='replace')
+    write(3) history_count
+    close(3)
+
+    open(unit=4, file='IMCF_out/batch_times.bin', form='unformatted', status='replace')
+    write(4) batch_times
+    close(4)
+
+    print *, 'files written to dir successfully!'
 
     deallocate(calc_int)
     deallocate(calc_stddev)
@@ -78,6 +96,6 @@ program integralMCF
 contains
     function f(x) result(y)
         real(dp) :: x, y
-        y = x ** 2
+        y = x **2 + 2 * x + 2
     end function f
 end program integralMCF

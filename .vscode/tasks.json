@@ -10,7 +10,7 @@
                 "main.f90"
             ],
             "options": {
-                "cwd": "${workspaceFolder}/FDIMCE"
+                "cwd": "${workspaceFolder}/IMCF"
             },
             "group": {
                 "kind": "build",
