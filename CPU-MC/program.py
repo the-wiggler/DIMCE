@@ -1,8 +1,8 @@
 from DIMCE_CPU import IntegralMC
 
 integral_calc = IntegralMC(
-    batches=30,  # Number of times that sets of integral should be estimated ( y in calc_int array )
-    int_per_batch=2,  # How many estimates of integral should be output per batch ( x in calc_int array )
+    batches=3000,  # Number of times that sets of integral should be estimated ( y in calc_int array )
+    int_per_batch=3,  # How many estimates of integral should be output per batch ( x in calc_int array )
     chunk_size=10 ** 7,  # for VRAM management, chunks history count into "manageable bites" for your VRAM. decrease for less VRAM (current system uses RTX 4070) -- untested at higher values
     a=0,  # Lower bound of the integral
     b=5,  # Upper bound of the integral

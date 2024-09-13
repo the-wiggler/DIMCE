@@ -1,22 +1,16 @@
-program monte_carlo_pi
-  implicit none
-  integer :: num_samples, i, inside_circle
-  real :: x, y, pi_estimate
+function int_estimate
+    integer :: i, batches, int_per_batch, chunk_size, a, b, histories, f, hist_factor, repetition_factor
+    integer :: sum_function_output, total_points, num_chunks, current_chunk, n
+    real :: x, y
 
-  integer :: seed
-  call random_seed()
+    sum_function_output = 0
+    total_points = 0
+    num_chunks = (n + chunk_size - 1) // chunk_size
 
-  num_samples = 10000000
-  inside_circle = 0
+    do while n > 0
+        current_chunk = maxval(n, chunk_size)
+    end do
+end function
+program integralMC
 
-  do i = 1, num_samples
-      call random_number(x)
-      call random_number(y)
-      if (x**2 + y**2 <= 1.0) then
-          inside_circle = inside_circle + 1
-      end if
-  end do
-
-  pi_estimate = 4.0 * inside_circle / num_samples
-  print *, "Estimated Pi:", pi_estimate
-end program monte_carlo_pi
+end program
