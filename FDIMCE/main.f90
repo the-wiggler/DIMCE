@@ -1,16 +1,34 @@
-function int_estimate
-    integer :: i, batches, int_per_batch, chunk_size, a, b, histories, f, hist_factor, repetition_factor
-    integer :: sum_function_output, total_points, num_chunks, current_chunk, n
-    real :: x, y
+program monte_carlo_integration
+    implicit none
 
-    sum_function_output = 0
-    total_points = 0
-    num_chunks = (n + chunk_size - 1) // chunk_size
+    integer(8), parameter :: points_per_batch = 1000000000
+    real(8) :: x, integral_estimate, sum_curve
+    integer(8) :: i, total_checks
+    real(8) :: a, b
 
-    do while n > 0
-        current_chunk = maxval(n, chunk_size)
+    call random_seed()
+
+    a = 0.0_8
+    b = 6.0_8
+
+    sum_curve = 0.0_8
+    total_checks = 0
+
+    do i = 1, points_per_batch
+        call random_number(x)
+        x = a + x * (b - a)
+        sum_curve = sum_curve + f(x)
+        total_checks = total_checks + 1
     end do
-end function
-program integralMC
 
-end program
+    integral_estimate = (b - a) * (sum_curve / total_checks)
+
+    print *, "Estimated integral value:", integral_estimate
+
+contains
+    function f(x) result(y)
+        real(8) :: x, y
+        y = x ** 2
+    end function f
+
+end program monte_carlo_integration
