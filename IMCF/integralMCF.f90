@@ -2,7 +2,7 @@ program integralMCF
     use omp_lib
     implicit none
     integer, parameter :: dp = selected_real_kind(15, 307)
-    integer :: histories = 100000
+    integer :: histories = 1000000
     real(dp) :: x, sum_curve, mean, variance, stddev
     real(dp) :: a, b, start_time, end_time
     integer :: i, j, k, total_checks, batches, bat_countdown, iter_pb
