@@ -3,6 +3,8 @@ import numpy as np
 import time
 import os
 
+if not os.path.exists('np_store_GPU'):
+    os.makedirs('np_store_GPU')
 
 class IntegralMC:
     def __init__(self, batches, int_per_batch, chunk_size, a, b, histories, f, hist_factor, repetition_factor):

@@ -92,8 +92,8 @@ class PlotArrays:
 
 # Usage
 plot_arrays = PlotArrays(
-    avg_calc_int=np.load(os.path.join('np_store_GPU', 'avg_calc_int_GPU.npy')),
-    std_list=np.load(os.path.join('np_store_GPU', 'std_list_GPU.npy')),
-    history_count_list=np.load(os.path.join('np_store_GPU', 'history_count_list_GPU.npy')),
-    batch_times=np.load(os.path.join('np_store_GPU', 'batch_times_GPU.npy')),
+    avg_calc_int=np.load(os.path.join('./np_store_GPU', 'avg_calc_int_GPU.npy')),
+    std_list=np.load(os.path.join('./np_store_GPU', 'std_list_GPU.npy')),
+    history_count_list=np.load(os.path.join('./np_store_GPU', 'history_count_list_GPU.npy')),
+    batch_times=np.load(os.path.join('./np_store_GPU', 'batch_times_GPU.npy')),
 )

@@ -1,5 +1,5 @@
+! **** Does not use OpenMP for parallelization ****
 program integralMCF
-    use omp_lib
     implicit none
     integer, parameter :: dp = selected_real_kind(15, 307)
     integer :: histories = 50000
@@ -24,8 +24,6 @@ program integralMCF
     allocate(batch_results(iter_pb))
     bat_countdown = batches
 
-    ! call omp_set_num_threads(16)
-    !$OMP PARALLEL DO PRIVATE(j, k, i, sum_curve, total_checks, x, variance, stddev, mean) SHARED(a, b, histories, calc_int, calc_stddev, history_count, batch_times)
     do j = 1, batches ! a loop that recursively creates new estimations with an increasing history rate for data analysis
         call system_clock(start) ! batch time start
         do k = 1, iter_pb
@@ -53,10 +51,8 @@ program integralMCF
         print *, 'Time remaining:', bat_countdown, '| Estimates:', histories
         bat_countdown = bat_countdown - 1
         history_count(j) = histories
-        histories = histories + 100000
-    end do
-    !$OMP END PARALLEL DO
-    
+        histories = histories + 1000000
+    end do    
 
     print *, 'Estimated integral value:'
     do j = 1, batches

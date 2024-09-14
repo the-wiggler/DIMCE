@@ -3,6 +3,9 @@ from tqdm import tqdm
 import time
 import os
 
+if not os.path.exists('np_store_CPU'):
+    os.makedirs('np_store_CPU')
+
 class IntegralMC:
     def __init__(self, batches, int_per_batch, chunk_size, a, b, histories, f, hist_factor, repetition_factor):
         self.batches = batches
@@ -51,7 +54,7 @@ class IntegralMC:
                 num = [self.int_estimate(delta_histories, a, b, chunk_size, f) for _ in range(int_per_batch)]
                 history_count_list.append(delta_histories)
                 calc_int.extend(num)
-                delta_histories *= hist_factor
+                delta_histories += hist_factor
                 batch_time = time.time() - batch_start_time
                 batch_times.append(batch_time)
         print(calc_int)

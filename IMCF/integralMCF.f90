@@ -53,7 +53,7 @@ program integralMCF
         print *, 'Time remaining:', bat_countdown, '| Estimates:', histories
         bat_countdown = bat_countdown - 1
         history_count(j) = histories
-        histories = histories + 100000
+        histories = histories + 1000000
     end do
     !$OMP END PARALLEL DO
     
