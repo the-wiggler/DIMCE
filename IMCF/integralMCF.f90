@@ -4,18 +4,17 @@ program integralMCF
     integer, parameter :: dp = selected_real_kind(15, 307)
     integer :: histories = 50000
     real(dp) :: x, sum_curve, mean, variance, stddev
-    real(dp) :: a, b
+    real(dp) :: a, b, start_time, end_time
     integer :: i, j, k, total_checks, batches, bat_countdown, iter_pb
-    integer :: start, finish, rate
     real(dp), allocatable :: batch_results(:), calc_int(:), calc_stddev(:), batch_times(:)
     integer, allocatable :: history_count(:)
+
     call random_seed()
-    call system_clock(count_rate=rate)
 
     a = 0.0_dp ! lower range of integration
     b = 6.0_dp ! upper range of integration
-    batches = 100 ! how many times to perform an integral estimation
-    iter_pb = 5 ! how many iterations should be performed in each batch (to be averaged together)
+    batches = 10000 ! how many times to perform an integral estimation
+    iter_pb = 3 ! how many iterations should be performed in each batch (to be averaged together)
 
     allocate(calc_int(batches))
     allocate(calc_stddev(batches))
@@ -24,10 +23,10 @@ program integralMCF
     allocate(batch_results(iter_pb))
     bat_countdown = batches
 
-    ! call omp_set_num_threads(16)
+    call omp_set_num_threads(16)
     !$OMP PARALLEL DO PRIVATE(j, k, i, sum_curve, total_checks, x, variance, stddev, mean) SHARED(a, b, histories, calc_int, calc_stddev, history_count, batch_times)
     do j = 1, batches ! a loop that recursively creates new estimations with an increasing history rate for data analysis
-        call system_clock(start) ! batch time start
+        start_time = omp_get_wtime() ! batch time start
         do k = 1, iter_pb
             sum_curve = 0.0_dp ! the sum of output values
             total_checks = 0 ! the total points taken in this iteration
@@ -43,8 +42,8 @@ program integralMCF
         mean = sum(batch_results) / iter_pb ! Calculate mean of the batch
 
         calc_int(j) = mean
-        call system_clock(finish) ! batch time end
-        batch_times(j) = real(finish - start) / real(rate)
+        end_time = omp_get_wtime() ! batch time end
+        batch_times(j) = end_time - start_time
 
         variance = sum((batch_results - mean) ** 2) / (iter_pb - 1) ! calculates variance of batch_results set over {iter_pb} trials
         stddev = sqrt(variance) ! calculates standard deviation 
@@ -53,51 +52,30 @@ program integralMCF
         print *, 'Time remaining:', bat_countdown, '| Estimates:', histories
         bat_countdown = bat_countdown - 1
         history_count(j) = histories
-        histories = histories + 1000000
+        histories = histories + 100
     end do
     !$OMP END PARALLEL DO
     
 
-    print *, 'Estimated integral value:'
+    print *, 'Estimated integral values and standard deviations:'
     do j = 1, batches
-        print *, 'Batch ', j, ': ', calc_int(j)
+        print *, 'Batch ', j, ': Integral =', calc_int(j), 'Std Dev =', calc_stddev(j), &
+                 'Histories =', history_count(j), 'Time =', batch_times(j)
     end do
-    print *, 'Standard deviation for each batch:'
-    do j = 1, batches
-        print *, 'Batch ', j, ': ', calc_stddev(j)
-    end do
-    print *, 'History Values:'
-    do j = 1, batches
-        print *, 'Batch ', j, ': ', history_count(j)
-    end do
-        print *, 'Batch Times:'
-    do j = 1, batches
-        print *, 'Batch ', j, ': ', batch_times(j)
-    end do
+
 
     ! write arrays
-    open(unit=1, file='IMCF_out/calc_int.bin', form='unformatted', status='replace')
-    write(1) calc_int
+    open(unit=1, file='results.csv', status='replace')
+    write(1,*) 'batch,history,calc_int,stddev,batch_time'
+    do j = 1, batches
+        write(1,'(I0,",",I0,",",ES15.7,",",ES15.7,",",ES15.7)') &
+              j, history_count(j), calc_int(j), calc_stddev(j), batch_times(j)
+    end do
     close(1)
+    print *, 'CSV file written successfully!'
 
-    open(unit=2, file='IMCF_out/calc_stddev.bin', form='unformatted', status='replace')
-    write(2) calc_stddev
-    close(2)
 
-    open(unit=3, file='IMCF_out/history_count.bin', form='unformatted', status='replace')
-    write(3) history_count
-    close(3)
-
-    open(unit=4, file='IMCF_out/batch_times.bin', form='unformatted', status='replace')
-    write(4) batch_times
-    close(4)
-
-    print *, 'files written to dir successfully!'
-
-    deallocate(calc_int)
-    deallocate(calc_stddev)
-    deallocate(history_count)
-    deallocate(batch_results)
+    deallocate(calc_int, calc_stddev, history_count, batch_times)
 
 contains
     function f(x) result(y)
