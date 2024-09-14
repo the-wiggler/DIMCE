@@ -1,12 +1,12 @@
 program integralMCF
-    use omp_lib
+    use openacc
     implicit none
     integer, parameter :: dp = selected_real_kind(15, 307)
-    integer :: histories = 10000
+    integer :: histories = 1000000
     real(dp) :: x, sum_curve, mean, variance, stddev
     real(dp) :: a, b, start_time, end_time
-    integer :: i, j, k, total_checks, batches, bat_countdown, iter_pb
-    real(dp), allocatable :: batch_results(:), calc_int(:), calc_stddev(:), batch_times(:)
+    integer(dp) :: i, j, k, total_checks, batches, bat_countdown, iter_pb, x_track
+    real(dp), allocatable :: batch_results(:), calc_int(:), calc_stddev(:), batch_times(:), random_x(:)
     integer, allocatable :: history_count(:)
 
     call random_seed()
@@ -17,34 +17,39 @@ program integralMCF
     iter_pb = 3 ! how many iterations should be performed in each batch (to be averaged together)
 
     allocate(calc_int(batches), calc_stddev(batches), history_count(batches), batch_times(batches), batch_results(iter_pb))
+
+    allocate(random_x(batches*iter_pb*histories))
+    !$OMP PARALLEL DO
+    do j = 1, batches * iter_pb * histories
+        call random_number(x)
+        x = a + x * (b - a)
+        random_x(j) = x
+    end do
+    !$OMP END PARALLEL DO
+
     bat_countdown = batches
-
-    !$OMP PARALLEL DO PRIVATE(j, k, i, sum_curve, total_checks, x) &
-    !$OMP& PRIVATE(variance, stddev, mean) &
-    !$OMP& SHARED(a, b, histories, calc_int, calc_stddev, history_count, batch_times)
-
+    x_track = batches * iter_pb * histories
+    !$acc kernels
     do j = 1, batches ! a loop that recursively creates new estimations with an increasing history rate for data analysis
-        start_time = omp_get_wtime() ! batch time start
+        ! start_time = omp_get_wtime() ! batch time start
         do k = 1, iter_pb
             sum_curve = 0.0_dp ! the sum of output values
             total_checks = 0 ! the total points taken in this iteration
             do i = 1, histories
-                call random_number(x)
-                x = a + x * (b - a) ! scales x to be within a range from b to a
-                sum_curve = sum_curve + f(x) ! calculates an output value based on a random x and adds it to the total
+                sum_curve = sum_curve + f(random_x(x_track)) ! calculates an output value based on a random x and adds it to the total
                 total_checks = total_checks + 1
             end do
             batch_results(k) = (b - a) * (sum_curve / total_checks) ! calculates the integral by averaging the range of y values and calculating the area based on width x avg height
+            x_track = x_track - 1
         end do
 
         mean = sum(batch_results) / iter_pb ! Calculate mean of the batch
-
         calc_int(j) = mean
-        end_time = omp_get_wtime() ! batch time end
-        batch_times(j) = end_time - start_time
+        ! end_time = omp_get_wtime() ! batch time end
+        ! batch_times(j) = end_time - start_time
 
         variance = sum((batch_results - mean) ** 2) / (iter_pb - 1) ! calculates variance of batch_results set over {iter_pb} trials
-        stddev = sqrt(variance) ! calculates standard deviation 
+        stddev = sqrt(variance) ! calculates standard deviation
         calc_stddev(j) = stddev
 
         print *, 'Time remaining:', bat_countdown, '| Estimates:', histories
@@ -52,13 +57,13 @@ program integralMCF
         history_count(j) = histories
         histories = histories + 100
     end do
-    !$OMP END PARALLEL DO
+    !$acc end kernels
     
 
     print *, 'Estimated integral values and standard deviations:'
     do j = 1, batches
         print *, 'Batch ', j, ': Integral =', calc_int(j), 'Std Dev =', calc_stddev(j), &
-                 'Histories =', history_count(j), 'Time =', batch_times(j)
+                 'Histories =', history_count(j)!, 'Time =', batch_times(j)
     end do
 
 
