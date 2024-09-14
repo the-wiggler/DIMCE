@@ -2,7 +2,7 @@ program integralMCF
     use omp_lib
     implicit none
     integer, parameter :: dp = selected_real_kind(15, 307)
-    integer :: histories = 10000
+    integer :: histories = 100000
     real(dp) :: x, sum_curve, mean, variance, stddev
     real(dp) :: a, b, start_time, end_time
     integer :: i, j, k, total_checks, batches, bat_countdown, iter_pb
@@ -23,7 +23,10 @@ program integralMCF
     allocate(batch_results(iter_pb))
     bat_countdown = batches
 
-    !$OMP PARALLEL DO PRIVATE(j, k, i, sum_curve, total_checks, x, variance, stddev, mean) SHARED(a, b, histories, calc_int, calc_stddev, history_count, batch_times)
+    !$OMP PARALLEL DO PRIVATE(j, k, i, sum_curve, total_checks, x) &
+    !$OMP& PRIVATE(variance, stddev, mean) &
+    !$OMP& SHARED(a, b, histories, calc_int, calc_stddev, history_count, batch_times)
+
     do j = 1, batches ! a loop that recursively creates new estimations with an increasing history rate for data analysis
         start_time = omp_get_wtime() ! batch time start
         do k = 1, iter_pb
