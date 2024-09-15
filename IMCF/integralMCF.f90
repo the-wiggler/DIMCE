@@ -63,7 +63,7 @@ program integralMCF
 
 
     ! write arrays
-    open(unit=1, file='results2.csv', status='replace')
+    open(unit=1, file='results.csv', status='replace')
     write(1,*) 'batch,history,calc_int,stddev,batch_time'
     do j = 1, batches
         write(1,'(I0,",",I0,",",ES15.7,",",ES15.7,",",ES15.7)') &
