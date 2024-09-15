@@ -2,7 +2,7 @@ program integralMCF
     use omp_lib
     implicit none
     integer, parameter :: dp = selected_real_kind(15, 307)
-    integer :: histories = 1000000
+    integer :: histories = 100000000
     real(dp) :: x, sum_curve, mean, variance, stddev
     real(dp) :: a, b, start_time, end_time
     integer :: i, j, k, total_checks, batches, bat_countdown, iter_pb
@@ -13,7 +13,7 @@ program integralMCF
 
     a = 0.0_dp ! lower range of integration
     b = 6.0_dp ! upper range of integration
-    batches = 1500 ! how many times to perform an integral estimation
+    batches = 100 ! how many times to perform an integral estimation
     iter_pb = 3 ! how many iterations should be performed in each batch (to be averaged together)
 
     allocate(calc_int(batches), calc_stddev(batches), history_count(batches), batch_times(batches), batch_results(iter_pb))
@@ -63,7 +63,7 @@ program integralMCF
 
 
     ! write arrays
-    open(unit=1, file='results.csv', status='replace')
+    open(unit=1, file='results2.csv', status='replace')
     write(1,*) 'batch,history,calc_int,stddev,batch_time'
     do j = 1, batches
         write(1,'(I0,",",I0,",",ES15.7,",",ES15.7,",",ES15.7)') &
