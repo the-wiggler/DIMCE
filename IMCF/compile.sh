@@ -1,2 +1,2 @@
 #!/bin/bash
-gfortran IMCF -o integralMCF.f90 -fopenmp
+gfortran integralMCF.f90 -o IMCF -fopenmp

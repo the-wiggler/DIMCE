@@ -2,12 +2,12 @@ program integralMCF
     use omp_lib
     implicit none
     integer, parameter :: dp = selected_real_kind(15, 307)
-    integer :: histories = 10
+    integer(dp) :: histories = 10
     real(dp) :: x, sum_curve, mean, variance, stddev
     real(dp) :: a, b, start_time, end_time
-    integer :: i, j, k, total_checks, batches, bat_countdown, iter_pb
+    integer(dp) :: i, j, k, total_checks, batches, bat_countdown, iter_pb
     real(dp), allocatable :: batch_results(:), calc_int(:), calc_stddev(:), batch_times(:)
-    integer, allocatable :: history_count(:)
+    integer(dp), allocatable :: history_count(:)
 
     call random_seed()
 
