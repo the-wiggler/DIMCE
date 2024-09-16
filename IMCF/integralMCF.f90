@@ -7,23 +7,24 @@ program integralMCF
     real(dp) :: a, b, start_time, end_time
     integer(dp) :: i, j, k, total_checks, batches, bat_countdown, iter_pb
     real(dp), allocatable :: batch_results(:), calc_int(:), calc_stddev(:), batch_times(:)
-    integer(dp), allocatable :: history_count(:)
+    integer(dp), allocatable :: history_count(:), thread_num(:)
 
     call random_seed()
 
     a = 0.0_dp ! lower range of integration
     b = 6.0_dp ! upper range of integration
-    batches = 300 ! how many times to perform an integral estimation
+    batches = 200 ! how many times to perform an integral estimation
     iter_pb = 3 ! how many iterations should be performed in each batch (to be averaged together)
 
-    allocate(calc_int(batches), calc_stddev(batches), history_count(batches), batch_times(batches), batch_results(iter_pb))
+    allocate(calc_int(batches), calc_stddev(batches), history_count(batches), batch_times(batches), batch_results(iter_pb) &
+        , thread_num(batches))
     bat_countdown = batches
 
     !$OMP PARALLEL DO PRIVATE(j, k, i, sum_curve, total_checks, x) &
     !$OMP& PRIVATE(variance, stddev, mean) &
     !$OMP& SHARED(a, b, histories, calc_int, calc_stddev, history_count, batch_times)
-
     do j = 1, batches ! a loop that recursively creates new estimations with an increasing history rate for data analysis
+    thread_num(j) = OMP_GET_THREAD_NUM()
         start_time = omp_get_wtime() ! batch time start
         do k = 1, iter_pb
             sum_curve = 0.0_dp ! the sum of output values
@@ -57,17 +58,17 @@ program integralMCF
 
     print *, 'Estimated integral values and standard deviations:'
     do j = 1, batches
-        print *, 'Batch ', j, ': Integral =', calc_int(j), 'Std Dev =', calc_stddev(j), &
-                 'Histories =', history_count(j), 'Time =', batch_times(j)
+        print *, 'Relative Batch ', j, ': Integral =', calc_int(j), 'Std Dev =', calc_stddev(j), &
+                 'Histories =', history_count(j), 'Time =', batch_times(j), 'Thread =', thread_num(j)
     end do
 
 
     ! write arrays
     open(unit=1, file='results.csv', status='replace')
-    write(1,*) 'batch,history,calc_int,stddev,batch_time'
+    write(1,*) 'rel_batch,history,calc_int,stddev,batch_time,thread_num'
     do j = 1, batches
-        write(1,'(I0,",",I0,",",ES15.7,",",ES15.7,",",ES15.7)') &
-              j, history_count(j), calc_int(j), calc_stddev(j), batch_times(j)
+        write(1,'(I0,",",I0,",",ES15.7,",",ES15.7,",",ES15.7,",",I0)') &
+              j, history_count(j), calc_int(j), calc_stddev(j), batch_times(j), thread_num(j)
     end do
     close(1)
     print *, 'CSV file written successfully!'
