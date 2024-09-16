@@ -1,1 +1,0 @@
-gfortran -O3 -c dqfuna.f90 dqfune.f90 dqmodule.f90 second.f90

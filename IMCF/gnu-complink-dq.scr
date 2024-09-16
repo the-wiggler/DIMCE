@@ -1,3 +1,0 @@
-gfortran -I/usr/local/lib/dqfun -O3 -o $1 $1.f90 /usr/local/lib/dqfun/dqmodule.o /usr/local/lib/dqfun/dqfune.o /usr/local/lib/dqfun/dqfuna.o /usr/local/lib/dqfun/second.o
-
-
