@@ -12,8 +12,8 @@ program integralMCF
     call random_seed()
 
     a = 0.0_dp ! lower range of integration
-    b = 6.0_dp ! upper range of integration
-    batches = 200 ! how many times to perform an integral estimation
+    b = 1.0_dp ! upper range of integration
+    batches = 100 ! how many times to perform an integral estimation
     iter_pb = 3 ! how many iterations should be performed in each batch (to be averaged together)
 
     allocate(calc_int(batches), calc_stddev(batches), history_count(batches), batch_times(batches), batch_results(iter_pb) &
@@ -79,6 +79,6 @@ program integralMCF
 contains
     function f(x) result(y)
         real(dp) :: x, y
-        y = x **2 + 2 * x + 2
+        y = log(1 + x) / x
     end function f
 end program integralMCF
