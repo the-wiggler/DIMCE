@@ -2,7 +2,7 @@
 program integralMCF
     implicit none
     integer, parameter :: dp = selected_real_kind(15, 307)
-    integer :: histories = 50000
+    integer(dp) :: histories = 100
     real(dp) :: x, sum_curve, mean, variance, stddev
     real(dp) :: a, b
     integer :: i, j, k, total_checks, batches, bat_countdown, iter_pb
@@ -14,8 +14,8 @@ program integralMCF
 
     a = 0.0_dp ! lower range of integration
     b = 6.0_dp ! upper range of integration
-    batches = 100 ! how many times to perform an integral estimation
-    iter_pb = 5 ! how many iterations should be performed in each batch (to be averaged together)
+    batches = 40 ! how many times to perform an integral estimation
+    iter_pb = 3 ! how many iterations should be performed in each batch (to be averaged together)
 
     allocate(calc_int(batches))
     allocate(calc_stddev(batches))
@@ -51,7 +51,7 @@ program integralMCF
         print *, 'Time remaining:', bat_countdown, '| Estimates:', histories
         bat_countdown = bat_countdown - 1
         history_count(j) = histories
-        histories = histories + 10000
+        histories = histories * 1.5
     end do    
 
     print *, 'Estimated integral values and standard deviations:'
@@ -61,7 +61,7 @@ program integralMCF
     end do
 
     ! write arrays
-    open(unit=1, file='results.csv', status='replace')
+    open(unit=1, file='results2.csv', status='replace')
     write(1,*) 'batch,history,calc_int,stddev,batch_time'
     do j = 1, batches
         write(1,'(I0,",",I0,",",ES15.7,",",ES15.7,",",ES15.7)') &
