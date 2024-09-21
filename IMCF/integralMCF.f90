@@ -2,7 +2,11 @@ program integralMCF
     use omp_lib
     implicit none
     integer, parameter :: dp = selected_real_kind(15, 307)
+<<<<<<< HEAD
     integer(dp) :: histories = 10000000
+=======
+    integer(dp) :: histories = 1000
+>>>>>>> origin/main
     real(dp) :: x, sum_curve, mean, variance, stddev
     real(dp) :: a, b, start_time, end_time
     integer(dp) :: i, j, k, total_checks, batches, bat_countdown, iter_pb, start, finish, rate
@@ -13,9 +17,15 @@ program integralMCF
     call system_clock(count_rate=rate)
 
     a = 0.0_dp ! lower range of integration
+<<<<<<< HEAD
     b = 6.0_dp ! upper range of integration
     batches = 5 ! how many times to perform an integral estimation
     iter_pb = 1 ! how many iterations should be performed in each batch (to be averaged together)
+=======
+    b = 1.0_dp ! upper range of integration
+    batches = 2000 ! how many times to perform an integral estimation
+    iter_pb = 3 ! how many iterations should be performed in each batch (to be averaged together)
+>>>>>>> origin/main
 
     allocate(calc_int(batches), calc_stddev(batches), history_count(batches), batch_times(batches), batch_results(iter_pb) &
         , thread_num(batches))
@@ -53,7 +63,11 @@ program integralMCF
         print *, 'Time remaining:', bat_countdown, '| Estimates:', histories
         bat_countdown = bat_countdown - 1
         history_count(j) = histories
+<<<<<<< HEAD
         histories = histories * 1
+=======
+        histories = histories * 1.01
+>>>>>>> origin/main
     end do
     !$OMP END PARALLEL DO
     call system_clock(finish)
