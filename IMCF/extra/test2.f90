@@ -2,7 +2,7 @@ program integralMCF
     use omp_lib
     implicit none
     integer, parameter :: dp = selected_real_kind(15, 307)
-    integer(dp) :: histories = 10000000
+    integer(dp) :: histories = 10
     real(dp) :: x, sum_curve, mean, variance, stddev
     real(dp) :: a, b, start_time, end_time
     integer(dp) :: i, j, k, total_checks, batches, bat_countdown, iter_pb, start, finish, rate
@@ -13,9 +13,9 @@ program integralMCF
     call system_clock(count_rate=rate)
 
     a = 0.0_dp ! lower range of integration
-    b = 6.0_dp ! upper range of integration
-    batches = 5 ! how many times to perform an integral estimation
-    iter_pb = 1 ! how many iterations should be performed in each batch (to be averaged together)
+    b = 1.0_dp ! upper range of integration
+    batches = 180 ! how many times to perform an integral estimation
+    iter_pb = 3 ! how many iterations should be performed in each batch (to be averaged together)
 
     allocate(calc_int(batches), calc_stddev(batches), history_count(batches), batch_times(batches), batch_results(iter_pb) &
         , thread_num(batches))
@@ -26,8 +26,6 @@ program integralMCF
     !$OMP& PRIVATE(variance, stddev, mean) &
     !$OMP& SHARED(a, b, histories, calc_int, calc_stddev, history_count, batch_times)
     do j = 1, batches ! a loop that recursively creates new estimations with an increasing history rate for data analysis
-    thread_num(j) = OMP_GET_THREAD_NUM()
-        start_time = omp_get_wtime() ! batch time start
         do k = 1, iter_pb
             sum_curve = 0.0_dp ! the sum of output values
             total_checks = 0 ! the total points taken in this iteration
@@ -43,8 +41,6 @@ program integralMCF
         mean = sum(batch_results) / iter_pb ! Calculate mean of the batch
 
         calc_int(j) = mean
-        end_time = omp_get_wtime() ! batch time end
-        batch_times(j) = end_time - start_time
 
         variance = sum((batch_results - mean) ** 2) / (iter_pb - 1) ! calculates variance of batch_results set over {iter_pb} trials
         stddev = sqrt(variance) ! calculates standard deviation 
@@ -53,7 +49,7 @@ program integralMCF
         print *, 'Time remaining:', bat_countdown, '| Estimates:', histories
         bat_countdown = bat_countdown - 1
         history_count(j) = histories
-        histories = histories * 1
+        histories = histories * 1.1
     end do
     !$OMP END PARALLEL DO
     call system_clock(finish)
@@ -65,7 +61,7 @@ program integralMCF
     end do
 
     ! write arrays
-    open(unit=1, file='results.csv', status='replace')
+    open(unit=1, file='resultsOMP.csv', status='replace')
     write(1,*) 'rel_batch,history,calc_int,stddev,batch_time,thread_num'
     do j = 1, batches
         write(1,'(I0,",",I0,",",ES15.7,",",ES15.7,",",ES15.7,",",I0)') &
