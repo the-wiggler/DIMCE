@@ -3,16 +3,17 @@ program integralMCF
     implicit none
     integer, parameter :: dp = selected_real_kind(15, 307)
     integer(dp) :: i, j, k, total_samples, batches, histories
-    real(dp) :: x, a, b, IMC, mean
-    real(dp), allocatable :: IMC_val(:), r_val(:)
+    real(dp) :: x, a, b, IMC, mean, hist_real
+    real(dp), allocatable :: IMC_val(:), r_val(:), variance(:)
+    integer(dp), allocatable :: history_count(:)
     call random_seed()
 
     a = 0.0_dp ! lower range of integration
     b = 5.0_dp ! upper range of integration
-    batches = 500
-    histories = 100
+    batches = 50000
+    histories = 1000
 
-    allocate(IMC_val(batches))
+    allocate(IMC_val(batches), variance(batches), history_count(batches))
 
     do j = 1, batches
         ! BEGIN CALCULATION ***********************************************************************************
@@ -27,15 +28,31 @@ program integralMCF
         ! END CALCULATION *************************************************************************************
         IMC_val(j) = IMC
 
-        mean = sum(IMC_val) / histories
-        print *, mean
+        mean = sum(IMC_val(1:j)) / j  ! Use all calculated IMC values up to the current batch
+        hist_real = real(j)
+        variance(j) = sum((IMC_val(1:j) - mean) ** 2) / hist_real  ! Calculate variance
 
-        print *, 'Batch:', j, 'Histories:', histories, 'IMC:', IMC, 'Variance:'
+        history_count(j) = histories
 
-        histories = histories * 1.1 ! the growth factor of histories between batches
+        print *, 'Batch:', j, 'Histories:', histories, 'IMC:', IMC, 'Variance:', variance(j)
+
+        histories = histories + 1.001 ! the growth factor of histories between batches
         deallocate(r_val)
     end do
-    deallocate(IMC_val)
+    
+
+    ! Write arrays to CSV
+    open(unit=1, file='results.csv', status='replace')
+    write(1,*) 'batch,IMC_val,history_count,variance'
+    do j = 1, batches
+        write(1, '(I0,",",ES15.7,",",I0,",",ES15.7)') &
+              j, IMC_val(j), history_count(j), variance(j)  ! Corrected references
+    end do
+    close(1)
+    print *, 'CSV file written successfully!'
+
+
+    deallocate(IMC_val, variance, history_count)
 contains
 
     function f(x) result(y)
