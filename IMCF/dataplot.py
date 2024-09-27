@@ -4,15 +4,7 @@ import numpy as np
 
 data = pd.read_csv("results.csv")
 # data2 = pd.read_csv("resultsSERIAL.csv")
-print(data.columns)
-print(data.head())
 
-
-# batch
-# history
-# calc_int
-# stddev
-# batch_time
 
 # Plot stddev
 plt.figure(1)
@@ -20,12 +12,22 @@ plt.scatter(data['history_count'], data['variance'], s=1, color='r')
 plt.title(r"Integration of $\int_{0}^{1} \frac{\ln(1+x)}{x}\, dx$ ~ History Count v. Variance of Integration", fontsize=14)
 plt.xlabel("History Count")
 plt.ylabel("Variance")
+plt.xscale('log')
+plt.yscale('log')
 
 plt.figure(3)
 plt.scatter(data['history_count'], data['stdv'], s=1, color='r')
 plt.title(r"Integration of $\int_{0}^{1} \frac{\ln(1+x)}{x}\, dx$ ~ History Count v. Standard Deviation of Integration", fontsize=14)
 plt.xlabel("History Count")
 plt.ylabel("Standard Deviation")
+plt.xscale('log')
+plt.yscale('log')
+
+# plt.figure(2)
+# plt.scatter(data['history_count'], data['rel_err'], s=1, color='r')
+# plt.title(r"Integration of $\int_{0}^{1} \frac{\ln(1+x)}{x}\, dx$ ~ History Count v. Relative Error", fontsize=14)
+# plt.xlabel("History Count")
+# plt.ylabel("Relative Error")
 
 
 

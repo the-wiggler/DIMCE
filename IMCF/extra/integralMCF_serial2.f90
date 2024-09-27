@@ -10,9 +10,8 @@ program integralMCF
 
     a = 0.0_dp ! lower range of integration
     b = 5.0_dp ! upper range of integration
-    batches = 70 ! how many integrations to compute
+    batches = 1200
     histories = 100
-    lit_val = 0.52791728116532241384461568_dp
 
     allocate(IMC_val(batches), history_count(batches), variance(batches), stdv(batches), rel_err(batches))
 
@@ -39,16 +38,17 @@ program integralMCF
 
         print *, 'Batch:', j, 'Histories:', histories
 
-        histories = histories * 1.2 ! the growth factor of histories between batches
+        histories = histories * 1.01 ! the growth factor of histories between batches
         deallocate(r_val)
     end do
+    
 
     ! Write arrays to CSV
     open(unit=1, file='results.csv', status='replace')
-    write(1,*) 'batch,IMC_val,history_count,variance,stdv,rel_err'
+    write(1,*) 'batch,IMC_val,history_count,variance,stdv,rel_err,invsq_hist'
     do j = 1, batches
         write(1, '(I0,",",ES15.7,",",I0,",",ES15.7,",",ES15.7,",",ES15.7)') &
-              j, IMC_val(j), history_count(j), variance(j), stdv(j), rel_err(j)
+              j, IMC_val(j), history_count(j), variance(j), stdv(j), rel_err(j) ! Corrected references
     end do
     close(1)
     print *, 'CSV file written successfully!'
@@ -60,6 +60,7 @@ contains
     function f(x) result(y)
         real(dp) :: x, y
         y = sin(x**2)
+        lit_val = 0.52791728116532241384461568
     end function f
 
 end program integralMCF
