@@ -4,7 +4,7 @@ program integralMCF
     integer, parameter :: dp = selected_real_kind(15, 307)
     integer(dp) :: i, j, k, total_samples, batches, histories
     real(dp) :: x, a, b, IMC, mean, hist_real
-    real(dp), allocatable :: IMC_val(:), r_val(:), variance(:)
+    real(dp), allocatable :: IMC_val(:), r_val(:), variance(:), stdv(:)
     integer(dp), allocatable :: history_count(:)
     call random_seed()
 
@@ -13,7 +13,7 @@ program integralMCF
     batches = 50000
     histories = 1000
 
-    allocate(IMC_val(batches), variance(batches), history_count(batches))
+    allocate(IMC_val(batches), history_count(batches), variance(batches), stdv(batches))
 
     do j = 1, batches
         ! BEGIN CALCULATION ***********************************************************************************
@@ -31,6 +31,7 @@ program integralMCF
         mean = sum(IMC_val(1:j)) / j  ! Use all calculated IMC values up to the current batch
         hist_real = real(j)
         variance(j) = sum((IMC_val(1:j) - mean) ** 2) / hist_real  ! Calculate variance
+        stdv(j) = sqrt(variance(j))
 
         history_count(j) = histories
 
@@ -43,16 +44,16 @@ program integralMCF
 
     ! Write arrays to CSV
     open(unit=1, file='results.csv', status='replace')
-    write(1,*) 'batch,IMC_val,history_count,variance'
+    write(1,*) 'batch,IMC_val,history_count,variance,stdv'
     do j = 1, batches
-        write(1, '(I0,",",ES15.7,",",I0,",",ES15.7)') &
-              j, IMC_val(j), history_count(j), variance(j)  ! Corrected references
+        write(1, '(I0,",",ES15.7,",",I0,",",ES15.7,",",ES15.7)') &
+              j, IMC_val(j), history_count(j), variance(j), stdv(j)  ! Corrected references
     end do
     close(1)
     print *, 'CSV file written successfully!'
 
 
-    deallocate(IMC_val, variance, history_count)
+    deallocate(IMC_val, history_count, variance, stdv)
 contains
 
     function f(x) result(y)
