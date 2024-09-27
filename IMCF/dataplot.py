@@ -1,8 +1,11 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 
-data = pd.read_csv("resultsOMP.csv")
-data2 = pd.read_csv("resultsSERIAL.csv")
+data = pd.read_csv("results.csv")
+# data2 = pd.read_csv("resultsSERIAL.csv")
+
+
 
 # batch
 # history
@@ -13,18 +16,20 @@ data2 = pd.read_csv("resultsSERIAL.csv")
 # Plot stddev
 plt.figure(1)
 plt.scatter(data['history'], data['stddev'], s=1, color='r')
-plt.scatter(data2['history'], data2['stddev'], s=1, color='b')
 plt.title(r"Integration of $\int_{0}^{1} \frac{\ln(1+x)}{x}\, dx$ ~ History Count v. Standard Deviation of Integration", fontsize=14)
 plt.xlabel("History Count")
 plt.ylabel("Standard Deviation")
+plt.xscale('log')
+plt.yscale('log')
 
-# Plot calc_int
-plt.figure(2)
-plt.scatter(data['history'], data['calc_int'], s=1, color='r')
-plt.scatter(data2['history'], data2['calc_int'], s=1, color='b')
-plt.title(r"Integration of $\int_{0}^{1} \frac{\ln(1+x)}{x}\, dx$ ~ History Count v. Calculated Integration", fontsize=14)
-plt.xlabel("History Count")
-plt.ylabel("Calculated Integration")
+
+
+# # Plot calc_int
+# plt.figure(2)
+# plt.scatter(data['history'], data['calc_int'], s=1, color='r')
+# plt.title(r"Integration of $\int_{0}^{1} \frac{\ln(1+x)}{x}\, dx$ ~ History Count v. Calculated Integration", fontsize=14)
+# plt.xlabel("History Count")
+# plt.ylabel("Calculated Integration")
 
 # # # Plot batch_time
 # plt.figure(3)
