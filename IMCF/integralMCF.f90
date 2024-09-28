@@ -16,6 +16,7 @@ program integralMCF
 
     allocate(IMC_val(batches), history_count(batches), variance(batches), stdv(batches), rel_err(batches))
 
+    ! Creates an array of histories that each batch takes its respective index of
     do k = 1, batches
         history_count(k) = histories
         histories = histories * 1.01
@@ -23,25 +24,26 @@ program integralMCF
 
     hist_sum = sum(history_count)
 
+    !$OMP PARALLEL DO PRIVATE(j, i, histories, x, r_val, IMC) &
+    !$OMP& SHARED(a, b, IMC_val, batches)
     do j = 1, batches
         ! BEGIN CALCULATION ***********************************************************************************
         histories = history_count(j)
         allocate(r_val(histories))
-        !$OMP PARALLEL DO
         do i = 1, histories
             call random_number(x)
             x = a + x * (b - a) ! scales x to be within a range from b to a
             r_val(i) = f(x) ! appends rand f(x) val to array
         end do
-        !$OMP END PARALLEL DO
 
         IMC = (b - a) * (sum(r_val) / histories) ! CALCULATES INTEGRAL
         ! END CALCULATION *************************************************************************************
         IMC_val(j) = IMC
         deallocate(r_val)
-        write(*, '(A, I3, A, I0, A, I0)') 'Batch:', j, ' | Histories:', history_count(j), ' | Remaining Histories:', hist_sum
+        print *, 'Batch:', j, ' | Histories:', history_count(j), ' | Remaining Histories:', hist_sum
         hist_sum = hist_sum - histories
     end do
+    !$OMP END PARALLEL DO
 
     do j = 1, batches
         mean = sum(IMC_val(1:j)) / j  ! Use all calculated IMC values up to the current batch
