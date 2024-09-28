@@ -8,7 +8,7 @@ data = pd.read_csv("results.csv")
 
 # Plot stddev
 plt.figure(1)
-plt.scatter(data['history_count'], data['variance'], s=1, color='r')
+plt.scatter(data['history_count'], data['variance'], s=0.4, color='r')
 plt.title(r"Integration of $\int_{0}^{1} \frac{\ln(1+x)}{x}\, dx$ ~ History Count v. Variance of Integration", fontsize=14)
 plt.xlabel("History Count")
 plt.ylabel("Variance")
@@ -16,7 +16,7 @@ plt.xscale('log')
 plt.yscale('log')
 
 plt.figure(3)
-plt.scatter(data['history_count'], data['stdv'], s=1, color='r')
+plt.scatter(data['history_count'], data['stdv'], s=0.4, color='r')
 plt.title(r"Integration of $\int_{0}^{1} \frac{\ln(1+x)}{x}\, dx$ ~ History Count v. Standard Deviation of Integration", fontsize=14)
 plt.xlabel("History Count")
 plt.ylabel("Standard Deviation")
