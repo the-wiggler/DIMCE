@@ -27,6 +27,8 @@ axes[0, 2].scatter(data['history_count'], data['rel_err'], s=1, color='r')
 axes[0, 2].set_title("History Count v. Relative Error", fontsize=10)
 axes[0, 2].set_xlabel("History Count")
 axes[0, 2].set_ylabel("Relative Error")
+axes[0, 2].set_xscale('log')
+axes[0, 2].set_yscale('log')
 
 # Plot batch time
 axes[1, 0].scatter(data['history_count'], data['batch_time'], s=1, color='g')
@@ -44,7 +46,11 @@ axes[1, 1].set_ylabel("Relative Error")
 axes[1, 1].set_xscale('log')
 axes[1, 1].set_yscale('log')
 
-fig.delaxes(axes[1, 2])
+# Plot calculated integral vs histories
+axes[1, 2].scatter(data['history_count'], data['IMC_val'], s=1, color='g')
+axes[1, 2].set_title("Histories v. Calculated Integral", fontsize=10)
+axes[1, 2].set_xlabel("Histories")
+axes[1, 2].set_ylabel("IMC Value")
 
 plt.tight_layout()
 
